@@ -74,7 +74,7 @@ export DJIGUI_API_KEY=djigui_ci_stg_...
       }'
     ```
 
-    The response gives the premium in `amount` (francs CFA) and the quote's `id`. Its `status` is `awaiting_payment`.
+    The response gives the premium in `amount` (francs CFA) and the quote's `id`. Its `status` is `awaiting_payment`. You have 24 hours to pay it: after that, it expires.
   </Step>
   <Step title="Collect the payment">
     Give the Wave number that will pay:
@@ -100,7 +100,7 @@ export DJIGUI_API_KEY=djigui_ci_stg_...
       -H "x-api-key: $DJIGUI_API_KEY"
     ```
 
-    The status goes from `payment_pending` to `pending` once paid, and `contractId` is set. If the payment fails, it goes back to `awaiting_payment` and you can pay again. See [Payments](/guides/payments).
+    The status goes from `payment_pending` to `paid`, and `contractId` is set. If the payment fails, it goes back to `awaiting_payment` and you can pay again. See [Payments](/guides/payments).
   </Step>
   <Step title="Get the certificate">
     ```bash

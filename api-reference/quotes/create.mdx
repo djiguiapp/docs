@@ -5,7 +5,7 @@ api: "POST /quote/create"
 authMethod: "key"
 ---
 
-Prices one of your vehicles, as registered, under a coverage. The quote can then be [paid](/api-reference/quotes/pay) until its start date.
+Prices one of your vehicles, as registered, under a coverage. You then have **24 hours** to [pay](/api-reference/quotes/pay) the quote, and no later than its start date. After 24 hours unpaid, it expires. See [Quotes](/guides/quotes).
 
 You can create as many quotes as you need for the same vehicle: other coverages, durations or usages.
 
@@ -47,7 +47,7 @@ You can create as many quotes as you need for the same vehicle: other coverages,
 </ResponseField>
 
 <ResponseField name="status" type="string">
-  `awaiting_payment`, `payment_pending`, then the contract's status: `pending`, `started` or `expired`. See [Payments](/guides/payments#knowing-when-it-is-paid).
+  `awaiting_payment` or `payment_pending`, then one final status: `paid`, `cancelled` or `expired`. See [Quotes](/guides/quotes#quote-status).
 </ResponseField>
 <ResponseField name="contractId" type="string | null">
   The contract, once the quote is paid.
@@ -97,6 +97,9 @@ You can create as many quotes as you need for the same vehicle: other coverages,
 </ResponseField>
 <ResponseField name="created" type="string">
   ISO 8601 timestamp.
+</ResponseField>
+<ResponseField name="expires" type="string">
+  ISO 8601 timestamp, 24 hours after `created`: until when you can pay the quote.
 </ResponseField>
 
 ## Errors
@@ -165,7 +168,8 @@ curl -X POST https://businessapi-staging-civ.djigui.io/api/v1.0/quote/create \
     "hasRegistrationDocument": false,
     "created": "2026-10-20T09:14:03.512Z"
   },
-  "created": "2026-10-20T09:16:41.007Z"
+  "created": "2026-10-20T09:16:41.007Z",
+  "expires": "2026-10-21T09:16:41.007Z"
 }
 ```
 

@@ -48,6 +48,8 @@ Fields that are not documented are refused (`property ... should not exist`). An
 | 409 | `external_id_taken` | `vehicleId` | Another of your vehicles already has this external id. |
 | 409 | `payment_in_progress` | `paymentId`, `paymentUrl` | A payment for this quote is already waiting for the payer. Send them `paymentUrl` again. |
 | 409 | `quote_already_paid` | | The quote already has a contract. |
+| 409 | `quote_cancelled` | | You cancelled the quote: it can no longer be paid. |
+| 410 | `quote_expired` | | The quote was not paid within 24 hours of its creation. Create a new quote. |
 | 413 | `payload_too_large` | | The registration document is over 10 MB. |
 | 422 | `coverage_not_available` | | The coverage cannot be sold for this vehicle: wrong vehicle type, vehicle too old, or not priceable. `message` says which. |
 | 422 | `quote_start_date_passed` | | The quote's start date has passed. Create a new quote. |
