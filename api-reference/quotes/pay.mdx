@@ -13,7 +13,7 @@ Opens a Wave payment for the quote's premium plus Wave's fee. Send the returned 
 
 Then follow the quote with [`GET /quote/{id}/status`](/api-reference/quotes/status). See the [Payments guide](/guides/payments).
 
-The quote must start today or later. Calling this again while a payment waits does not open a second one: it answers `409 payment_in_progress` with the waiting payment's `paymentUrl`.
+The quote must not be expired or cancelled, and must start today or later. Calling this again while a payment waits does not open a second one: it answers `409 payment_in_progress` with the waiting payment's `paymentUrl`.
 
 <ParamField path="id" type="string" required>
   The quote's id.
@@ -69,6 +69,8 @@ The quote must start today or later. Calling this again while a payment waits do
 | 404 | `quote_not_found` | No quote with this id in your company. |
 | 409 | `payment_in_progress` | A payment is already waiting. `paymentId` and `paymentUrl` are that payment's. |
 | 409 | `quote_already_paid` | The quote already has a contract. |
+| 409 | `quote_cancelled` | You cancelled the quote. |
+| 410 | `quote_expired` | The quote was not paid within 24 hours: create a new quote. |
 | 422 | `quote_start_date_passed` | The quote's start date has passed: create a new quote. |
 | 422 | `quote_incomplete` | The quote has no policyholder phone: create a new quote. |
 | 502 | `payment_provider_unavailable` | Wave could not open the payment. Recorded as failed: retry later. |

@@ -24,7 +24,7 @@ sequenceDiagram
     loop Until the status changes
         You->>Djigui: GET /quote/{id}/status
     end
-    Djigui-->>You: status "pending", contractId
+    Djigui-->>You: status "paid", contractId
 ```
 
 1. **Open the payment** with [`POST /quote/{id}/pay`](/api-reference/quotes/pay) and the Wave number that will pay. Only that number can confirm it.
@@ -49,7 +49,7 @@ Djigui does not notify your systems yet: poll [`GET /quote/{id}/status`](/api-re
 | --- | --- | --- |
 | `awaiting_payment` | Never paid, or every attempt failed. | Open a payment. |
 | `payment_pending` | Waiting for the payer to confirm in Wave. | Keep polling. `payment.paymentUrl` is still valid. |
-| `pending`, `started`, `expired` | Paid: this is now the contract's status. | Follow the contract with `contractId`. |
+| `paid` | Paid: the contract is open. | Follow the contract with `contractId`, or with [`GET /contract/quote/{quoteId}`](/api-reference/contracts/get-by-quote). |
 
 `payment` in the status response is the latest attempt, with its `failureReason` when it failed.
 
@@ -72,6 +72,8 @@ So you can retry a pay request safely: it never charges twice.
 
 ## Quotes that cannot be paid
 
+- **Expired.** A quote can be paid for 24 hours after its creation, until its `expires`. After that, it answers `410 quote_expired`: create a new quote. A payment the payer is confirming when the 24 hours run out still counts. See [Quotes](/guides/quotes#expiry).
+- **Cancelled.** A quote you cancelled answers `409 quote_cancelled`.
 - **Start date passed.** A quote can be paid until its `startDate`, included. After that, it answers `422 quote_start_date_passed`: create a new quote with a new start date.
 - **No policyholder phone.** Quotes created before the phone became required answer `422 quote_incomplete`: create a new quote.
 

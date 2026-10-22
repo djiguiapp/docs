@@ -60,5 +60,6 @@ A link is `null` until its file is stored. The certificate is valid even if a do
 ## Finding contracts
 
 - One contract: [`GET /contract/{id}`](/api-reference/contracts/get), with the quote's `contractId`.
+- A quote's contract: [`GET /contract/quote/{quoteId}`](/api-reference/contracts/get-by-quote), with the quote's id.
 - A vehicle's contracts: [`GET /contract?vehicleId=...`](/api-reference/contracts/list).
 - All your company's contracts: [`GET /contract`](/api-reference/contracts/list), most recent first.

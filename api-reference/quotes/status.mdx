@@ -10,9 +10,12 @@ Poll this after [paying a quote](/api-reference/quotes/pay) to know when the pay
 
 | `status` | Meaning |
 | --- | --- |
-| `awaiting_payment` | Never paid, or every attempt failed. You can pay it. |
+| `awaiting_payment` | Never paid, or every attempt failed. You can pay it until `expires`. |
 | `payment_pending` | Waiting for the payer to confirm in Wave. |
-| `pending`, `started`, `expired` | Paid: the contract's status. `contractId` is set. |
+| `paid` | Final. The contract is open: `contractId` is set. Follow it with [Get a quote's contract](/api-reference/contracts/get-by-quote). |
+| `cancelled` | Final. You cancelled the quote. |
+
+An expired quote answers `410 quote_expired`. See [Quotes](/guides/quotes).
 
 <ParamField path="id" type="string" required>
   The quote's id.
@@ -38,12 +41,13 @@ Poll this after [paying a quote](/api-reference/quotes/pay) to know when the pay
 | Status | `code` | |
 | --- | --- | --- |
 | 404 | `quote_not_found` | No quote with this id in your company. |
+| 410 | `quote_expired` | The quote was not paid within 24 hours. |
 
 <ResponseExample>
 ```json Paid
 {
   "quoteId": "6c1d8f0e-3b7a-4f5e-9a51-2d0c7e8b4a12",
-  "status": "pending",
+  "status": "paid",
   "contractId": "9e2f4b6a-1c3d-4e5f-8a7b-6c5d4e3f2a1b",
   "payment": {
     "id": "b4e8a2c6-7d1f-4a3b-9e5c-8f0a1b2c3d4e",
