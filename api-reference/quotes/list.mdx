@@ -1,0 +1,70 @@
+---
+title: "List quotes"
+description: "Your company's quotes, with their status, optionally for one vehicle."
+api: "GET /quote"
+authMethod: "key"
+---
+
+Returns your company's quotes, most recent first, [paginated](/pagination). Each quote has its current `status` and, once paid, its `contractId`.
+
+## Query
+
+<ParamField query="vehicleId" type="string">
+  Only this vehicle's quotes.
+</ParamField>
+
+<ParamField query="page" default="1" type="integer">
+</ParamField>
+
+<ParamField query="limit" type="integer" default="20">
+  1 to 100.
+</ParamField>
+
+## Response
+
+<ResponseField name="data" type="object[]">
+  Quotes, with the fields of [Create a quote](/api-reference/quotes/create#response).
+</ResponseField>
+
+<ResponseField name="page" type="integer">
+</ResponseField>
+
+<ResponseField name="limit" type="integer">
+</ResponseField>
+
+<ResponseField name="total" type="integer">
+</ResponseField>
+
+<RequestExample>
+```bash One vehicle's quotes
+curl "https://businessapi-staging-civ.djigui.io/api/v1.0/quote?vehicleId=0f9b2abd-2fe8-4346-b49e-4a6aefd89a89" \
+  -H "x-api-key: $DJIGUI_API_KEY"
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200
+{
+  "data": [
+    {
+      "id": "6c1d8f0e-3b7a-4f5e-9a51-2d0c7e8b4a12",
+      "status": "pending",
+      "contractId": "9e2f4b6a-1c3d-4e5f-8a7b-6c5d4e3f2a1b",
+      "amount": 98450,
+      "duration": 12,
+      "usage": "pleasure",
+      "startDate": "2026-11-01",
+      "policyHolderName": "Kouamé Yao Serge",
+      "policyHolderPhone": "+2250757468458",
+      "coverageId": "20000000-0000-4000-8000-000000000001",
+      "coverage": { "id": "20000000-0000-4000-8000-000000000001", "name": "Tiers simple", "description": "Responsabilité civile", "order": 1, "properties": [] },
+      "vehicle": { "id": "0f9b2abd-2fe8-4346-b49e-4a6aefd89a89", "licencePlate": "1234AB01", "...": "..." },
+      "created": "2026-10-20T09:16:41.007Z"
+    }
+  ],
+  "page": 1,
+  "limit": 20,
+  "total": 1
+}
+```
+</ResponseExample>

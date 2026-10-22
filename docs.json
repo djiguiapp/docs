@@ -1,0 +1,97 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "Djigui Business API",
+  "colors": {
+    "primary": "#16A34A",
+    "light": "#07C983",
+    "dark": "#15803D"
+  },
+  "favicon": "/favicon.svg",
+  "navigation": {
+    "pages": [
+      {
+        "group": "Get started",
+        "pages": [
+          "index",
+          "quickstart",
+          "authentication",
+          "errors",
+          "pagination"
+        ]
+      },
+      {
+        "group": "Guides",
+        "pages": [
+          "guides/vehicles",
+          "guides/payments",
+          "guides/contracts"
+        ]
+      },
+      {
+        "group": "Coverages",
+        "pages": [
+          "api-reference/coverages/list",
+          "api-reference/coverages/get"
+        ]
+      },
+      {
+        "group": "Vehicles",
+        "pages": [
+          "api-reference/vehicles/create",
+          "api-reference/vehicles/list",
+          "api-reference/vehicles/get",
+          "api-reference/vehicles/update"
+        ]
+      },
+      {
+        "group": "Quotes",
+        "pages": [
+          "api-reference/quotes/create",
+          "api-reference/quotes/list",
+          "api-reference/quotes/pay",
+          "api-reference/quotes/status"
+        ]
+      },
+      {
+        "group": "Contracts",
+        "pages": [
+          "api-reference/contracts/list",
+          "api-reference/contracts/get"
+        ]
+      }
+    ]
+  },
+  "contextual": {
+    "options": [
+      "copy",
+      "view",
+      "chatgpt",
+      "claude",
+      "perplexity",
+      "mcp",
+      "cursor",
+      "vscode"
+    ]
+  },
+  "description": "Insure your clients' vehicles through Djigui: register a vehicle, get quotes, collect payment with Wave and receive the ASACI certificate.",
+  "api": {
+    "playground": {
+      "display": "interactive"
+    },
+    "examples": {
+      "languages": [
+        "curl",
+        "javascript",
+        "python"
+      ]
+    },
+    "mdx": {
+      "auth": {
+        "method": "key",
+        "name": "x-api-key"
+      },
+      "server": "https://businessapi-staging-civ.djigui.io/api/v1.0"
+    }
+  }
+}

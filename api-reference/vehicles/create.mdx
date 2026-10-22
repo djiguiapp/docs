@@ -1,0 +1,198 @@
+---
+title: "Register a vehicle"
+description: "Register one of your clients' vehicles, to quote it."
+api: "POST /vehicle"
+authMethod: "key"
+---
+
+Registers a vehicle once, to quote it as often as needed. Send JSON, or `multipart/form-data` with the same fields to attach the registration document. See the [Vehicles guide](/guides/vehicles).
+
+<Warning>
+  A vehicle cannot be changed after registration, except its `externalId`. Quotes are priced on these details.
+</Warning>
+
+## Body
+
+<ParamField body="type" type="string" required>
+  `auto` (car) or `bike` (motorbike).
+</ParamField>
+
+<ParamField body="licencePlate" type="string" required>
+  2 to 20 letters, digits or dashes, once spaces are removed. Stored without spaces and uppercased: `1234 ab 01` becomes `1234AB01`. Unique within your company.
+</ParamField>
+
+<ParamField body="externalId" type="string">
+  Your own reference for the vehicle, 1 to 255 characters. Unique within your company.
+</ParamField>
+
+<ParamField body="brand" type="string" required>
+  1 to 100 characters.
+</ParamField>
+
+<ParamField body="model" type="string" required>
+  1 to 100 characters.
+</ParamField>
+
+<ParamField body="year" type="integer" required>
+  Model year, 1900 to 2100.
+</ParamField>
+
+<ParamField body="firstRoadDate" type="string" required>
+  Date of first registration, `YYYY-MM-DD`, not in the future. Decides the vehicle's age, and so which coverages it is eligible for.
+</ParamField>
+
+<ParamField body="carOriginalValue" type="integer" required>
+  Value when new, in francs CFA.
+</ParamField>
+
+<ParamField body="carMarketValue" type="integer" required>
+  Value today, in francs CFA.
+</ParamField>
+
+<ParamField body="energy" type="string" required>
+  `essence`, `diesel`, `electric` or `hybrid`.
+</ParamField>
+
+<ParamField body="power" type="integer" required>
+  Fiscal horsepower for a car, cubic capacity for a motorbike.
+</ParamField>
+
+<ParamField body="noSeat" type="integer" required>
+  Number of seats, 1 to 100.
+</ParamField>
+
+<ParamField body="registrationDocument" type="file">
+  `multipart/form-data` only. The registration document (carte grise): PDF, JPEG or PNG, 10 MB at most.
+</ParamField>
+
+## Response
+
+`201 Created`, with the vehicle.
+
+<ResponseField name="id" type="string">
+  The vehicle's id, to pass as `vehicleId` when quoting.
+</ResponseField>
+
+<ResponseField name="externalId" type="string | null">
+</ResponseField>
+
+<ResponseField name="type" type="string">
+</ResponseField>
+
+<ResponseField name="licencePlate" type="string">
+  As stored: no spaces, uppercased.
+</ResponseField>
+
+<ResponseField name="brand" type="string">
+</ResponseField>
+
+<ResponseField name="model" type="string">
+</ResponseField>
+
+<ResponseField name="year" type="integer">
+</ResponseField>
+
+<ResponseField name="firstRoadDate" type="string">
+</ResponseField>
+
+<ResponseField name="carOriginalValue" type="integer">
+</ResponseField>
+
+<ResponseField name="carMarketValue" type="integer">
+</ResponseField>
+
+<ResponseField name="energy" type="string">
+</ResponseField>
+
+<ResponseField name="power" type="integer">
+</ResponseField>
+
+<ResponseField name="noSeat" type="integer">
+</ResponseField>
+
+<ResponseField name="hasRegistrationDocument" type="boolean">
+  Whether a registration document was attached.
+</ResponseField>
+<ResponseField name="created" type="string">
+  ISO 8601 timestamp.
+</ResponseField>
+
+## Errors
+
+| Status | `code` | |
+| --- | --- | --- |
+| 400 | `invalid_request` | A field breaks a rule, or `firstRoadDate` is in the future. |
+| 409 | `vehicle_already_exists` | Your company already has a vehicle with this plate or external id. `vehicleId` is that vehicle. |
+| 413 | `payload_too_large` | The document is over 10 MB. |
+| 422 | `invalid_document` | The document is not a PDF, JPEG or PNG. |
+| 502 | `storage_unavailable` | The document could not be stored. Nothing was created: retry. |
+
+<RequestExample>
+```bash JSON
+curl -X POST https://businessapi-staging-civ.djigui.io/api/v1.0/vehicle \
+  -H "x-api-key: $DJIGUI_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "type": "auto",
+    "licencePlate": "1234 AB 01",
+    "externalId": "client-4821-car-1",
+    "brand": "Toyota",
+    "model": "Corolla",
+    "year": 2019,
+    "firstRoadDate": "2019-06-15",
+    "carOriginalValue": 15000000,
+    "carMarketValue": 9000000,
+    "energy": "essence",
+    "power": 7,
+    "noSeat": 5
+  }'
+```
+
+```bash With a document
+curl -X POST https://businessapi-staging-civ.djigui.io/api/v1.0/vehicle \
+  -H "x-api-key: $DJIGUI_API_KEY" \
+  -F type=auto \
+  -F licencePlate="1234 AB 01" \
+  -F externalId=client-4821-car-1 \
+  -F brand=Toyota \
+  -F model=Corolla \
+  -F year=2019 \
+  -F firstRoadDate=2019-06-15 \
+  -F carOriginalValue=15000000 \
+  -F carMarketValue=9000000 \
+  -F energy=essence \
+  -F power=7 \
+  -F noSeat=5 \
+  -F registrationDocument=@carte-grise.pdf
+```
+</RequestExample>
+
+<ResponseExample>
+```json 201
+{
+  "id": "0f9b2abd-2fe8-4346-b49e-4a6aefd89a89",
+  "externalId": "client-4821-car-1",
+  "type": "auto",
+  "licencePlate": "1234AB01",
+  "brand": "Toyota",
+  "model": "Corolla",
+  "year": 2019,
+  "firstRoadDate": "2019-06-15",
+  "carOriginalValue": 15000000,
+  "carMarketValue": 9000000,
+  "energy": "essence",
+  "power": 7,
+  "noSeat": 5,
+  "hasRegistrationDocument": false,
+  "created": "2026-10-20T09:14:03.512Z"
+}
+```
+
+```json 409
+{
+  "code": "vehicle_already_exists",
+  "message": "The company already has a vehicle with this licence plate or external id.",
+  "vehicleId": "0f9b2abd-2fe8-4346-b49e-4a6aefd89a89"
+}
+```
+</ResponseExample>

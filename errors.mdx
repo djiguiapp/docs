@@ -1,0 +1,66 @@
+---
+title: "Errors"
+description: "Every error has the same shape. Switch on its code."
+icon: "triangle-exclamation"
+---
+
+Every error answers with an HTTP status and a JSON body:
+
+```json
+{
+  "code": "vehicle_not_found",
+  "message": "This vehicle does not exist."
+}
+```
+
+<Tip>
+  Switch on `code`: it is stable. `message` is meant for the developer reading the response and may change.
+</Tip>
+
+Some errors carry more fields, listed below: `details` for validation errors, and the id of the resource involved in a conflict.
+
+## Validation errors
+
+A request that breaks a rule answers `400 invalid_request`, with every broken rule in `details`:
+
+```json
+{
+  "code": "invalid_request",
+  "message": "The request is invalid.",
+  "details": [
+    "duration must be 3, 6 or 12 (months)",
+    "property color should not exist"
+  ]
+}
+```
+
+Fields that are not documented are refused (`property ... should not exist`). An id in the path that is not a UUID also answers `400 invalid_request`, without `details`.
+
+## Error codes
+
+| Status | `code` | Extra fields | What it means |
+| --- | --- | --- | --- |
+| 400 | `invalid_request` | `details` | The request breaks a rule. Fix it and retry. |
+| 401 | `unauthenticated` | | The API key is missing, wrong or revoked. |
+| 404 | `vehicle_not_found`, `coverage_not_found`, `quote_not_found`, `contract_not_found` | | No such resource in your company. Another company's ids answer the same. |
+| 404 | `not_found` | | No such route. |
+| 409 | `vehicle_already_exists` | `vehicleId` | Your company already has a vehicle with this licence plate or external id. `vehicleId` is that vehicle: use it. |
+| 409 | `external_id_taken` | `vehicleId` | Another of your vehicles already has this external id. |
+| 409 | `payment_in_progress` | `paymentId`, `paymentUrl` | A payment for this quote is already waiting for the payer. Send them `paymentUrl` again. |
+| 409 | `quote_already_paid` | | The quote already has a contract. |
+| 413 | `payload_too_large` | | The registration document is over 10 MB. |
+| 422 | `coverage_not_available` | | The coverage cannot be sold for this vehicle: wrong vehicle type, vehicle too old, or not priceable. `message` says which. |
+| 422 | `quote_start_date_passed` | | The quote's start date has passed. Create a new quote. |
+| 422 | `quote_incomplete` | | The quote cannot be paid as it is (for example, no policyholder phone). Create a new quote. |
+| 422 | `invalid_document` | | The registration document is not a PDF, JPEG or PNG. |
+| 500 | `internal_error` | | Something went wrong on Djigui's side. |
+| 502 | `payment_provider_unavailable` | `paymentId` | Wave could not open the payment. The attempt is recorded as failed: retry later. |
+| 502 | `storage_unavailable` | | The registration document could not be stored. Nothing was created: retry later. |
+| 503 | `payment_unavailable` | | Payments are unavailable for now. Retry later. |
+
+## Retrying
+
+- `4xx` errors will fail again until the request changes.
+- `500`, `502` and `503` can be retried. Wait a little between attempts.
+- Retrying [`POST /vehicle`](/api-reference/vehicles/create) is safe: a vehicle that was created the first time answers `409 vehicle_already_exists` with its id.
+- Retrying [`POST /quote/{id}/pay`](/api-reference/quotes/pay) is safe: a payment already waiting answers `409 payment_in_progress` with its `paymentUrl`.

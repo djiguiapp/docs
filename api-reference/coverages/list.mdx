@@ -1,0 +1,74 @@
+---
+title: "List coverages"
+description: "The car coverages Djigui sells, and what each covers."
+api: "GET /coverage"
+authMethod: "key"
+---
+
+Returns every car coverage, in display order. Not paginated.
+
+Coverages have no price: a premium depends on the vehicle, its usage and the duration. [Create a quote](/api-reference/quotes/create) to get one.
+
+<Note>
+  Only car coverages are listed. If you insure motorbikes, ask Djigui for the motorbike coverage ids: [`GET /coverage/{id}`](/api-reference/coverages/get) returns them and they can be quoted.
+</Note>
+
+## Response
+
+An array of coverages.
+
+<ResponseField name="id" type="string">
+  The coverage's id, to pass as `coverageId` when quoting.
+</ResponseField>
+
+<ResponseField name="name" type="string">
+  The coverage's name, for example `Tiers simple`.
+</ResponseField>
+
+<ResponseField name="description" type="string | null">
+</ResponseField>
+
+<ResponseField name="vehicleType" type="string">
+  `auto` or `bike`: the type of vehicle it can be quoted for.
+</ResponseField>
+
+<ResponseField name="order" type="integer | null">
+  Display position. The list is already sorted by it.
+</ResponseField>
+
+<ResponseField name="properties" type="object[]">
+  What the coverage covers, in display order.
+
+  <Expandable title="properties">
+    <ResponseField name="label" type="string">
+    </ResponseField>
+    <ResponseField name="description" type="string | null">
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseExample>
+```json 200
+[
+  {
+    "id": "20000000-0000-4000-8000-000000000001",
+    "name": "Tiers simple",
+    "description": "Responsabilité civile",
+    "vehicleType": "auto",
+    "order": 1,
+    "properties": [
+      { "label": "Responsabilité civile", "description": null },
+      { "label": "Défense et recours", "description": null }
+    ]
+  },
+  {
+    "id": "20000000-0000-4000-8000-000000000002",
+    "name": "Tous risques",
+    "description": null,
+    "vehicleType": "auto",
+    "order": 3,
+    "properties": []
+  }
+]
+```
+</ResponseExample>

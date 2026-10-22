@@ -1,0 +1,164 @@
+---
+title: "Get a contract"
+description: "A paid quote's contract, with its ASACI certificate and documents."
+api: "GET /contract/{id}"
+authMethod: "key"
+---
+
+Returns a contract, opened when its quote's payment was confirmed. Its id is the quote's `contractId`. See [Contracts and certificates](/guides/contracts).
+
+<ParamField path="id" type="string" required>
+  The contract's id.
+</ParamField>
+
+## Response
+
+<ResponseField name="id" type="string">
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  `pending` (waiting for the certificate or the start date), `started` (covered) or `expired`.
+</ResponseField>
+<ResponseField name="policyNumber" type="string | null">
+  For example `2026.055.401.04217`.
+</ResponseField>
+<ResponseField name="startDate" type="string | null">
+  First day covered, `YYYY-MM-DD`.
+</ResponseField>
+<ResponseField name="endDate" type="string | null">
+  Last day covered, `YYYY-MM-DD`.
+</ResponseField>
+<ResponseField name="paymentId" type="string | null">
+  The payment that opened it.
+</ResponseField>
+<ResponseField name="certificateStatus" type="string">
+  `pending` (being requested from ASACI), `issued`, or `failed` (contact Djigui).
+</ResponseField>
+<ResponseField name="quote" type="object">
+  The quote it was opened from.
+
+  <Expandable title="quote">
+    <ResponseField name="id" type="string">
+    </ResponseField>
+    <ResponseField name="amount" type="integer">Premium, francs CFA.</ResponseField>
+    <ResponseField name="duration" type="integer">Months.</ResponseField>
+    <ResponseField name="usage" type="string">
+    </ResponseField>
+    <ResponseField name="policyHolderName" type="string">
+    </ResponseField>
+    <ResponseField name="coverageId" type="string">
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+<ResponseField name="vehicle" type="object">
+  The vehicle, as in [Get a vehicle](/api-reference/vehicles/get).
+</ResponseField>
+<ResponseField name="certificate" type="object | null">
+  The ASACI certificate, `null` until issued.
+
+  <Expandable title="certificate">
+    <ResponseField name="certificateNumber" type="string">
+    </ResponseField>
+    <ResponseField name="insuranceCompany" type="string">
+    </ResponseField>
+    <ResponseField name="effectiveDate" type="string">
+    </ResponseField>
+    <ResponseField name="expiryDate" type="string">
+    </ResponseField>
+    <ResponseField name="pdfLink" type="string">The certificate as a PDF, hosted by ASACI.</ResponseField>
+    <ResponseField name="imageLink" type="string">The certificate as an image, hosted by ASACI.</ResponseField>
+    <ResponseField name="qrCodeLink" type="string">Its QR code.</ResponseField>
+  </Expandable>
+</ResponseField>
+<ResponseField name="documents" type="object">
+  Download links, **valid for one hour**. Each is `null` until its file is stored.
+
+  <Expandable title="documents">
+    <ResponseField name="certificateImageUrl" type="string | null">Djigui's copy of the certificate image.</ResponseField>
+    <ResponseField name="contractDocumentUrl" type="string | null">The insurance contract.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="created" type="string">
+</ResponseField>
+
+<ResponseField name="updated" type="string">
+</ResponseField>
+
+## Errors
+
+| Status | `code` | |
+| --- | --- | --- |
+| 404 | `contract_not_found` | No contract with this id in your company. |
+
+<ResponseExample>
+```json Issued
+{
+  "id": "9e2f4b6a-1c3d-4e5f-8a7b-6c5d4e3f2a1b",
+  "status": "pending",
+  "policyNumber": "2026.055.401.04217",
+  "startDate": "2026-11-01",
+  "endDate": "2027-10-31",
+  "paymentId": "b4e8a2c6-7d1f-4a3b-9e5c-8f0a1b2c3d4e",
+  "certificateStatus": "issued",
+  "quote": {
+    "id": "6c1d8f0e-3b7a-4f5e-9a51-2d0c7e8b4a12",
+    "amount": 98450,
+    "duration": 12,
+    "usage": "pleasure",
+    "policyHolderName": "Kouamé Yao Serge",
+    "coverageId": "20000000-0000-4000-8000-000000000001"
+  },
+  "vehicle": {
+    "id": "0f9b2abd-2fe8-4346-b49e-4a6aefd89a89",
+    "externalId": "client-4821-car-1",
+    "type": "auto",
+    "licencePlate": "1234AB01",
+    "brand": "Toyota",
+    "model": "Corolla",
+    "year": 2019,
+    "firstRoadDate": "2019-06-15",
+    "carOriginalValue": 15000000,
+    "carMarketValue": 9000000,
+    "energy": "essence",
+    "power": 7,
+    "noSeat": 5,
+    "hasRegistrationDocument": false,
+    "created": "2026-10-20T09:14:03.512Z"
+  },
+  "certificate": {
+    "certificateNumber": "CI-2026-0841736",
+    "insuranceCompany": "ATLANTA",
+    "effectiveDate": "2026-11-01",
+    "expiryDate": "2027-10-31",
+    "pdfLink": "https://...",
+    "imageLink": "https://...",
+    "qrCodeLink": "https://..."
+  },
+  "documents": {
+    "certificateImageUrl": "https://...",
+    "contractDocumentUrl": "https://..."
+  },
+  "created": "2026-10-20T09:19:47.118Z",
+  "updated": "2026-10-20T09:20:31.402Z"
+}
+```
+
+```json Not yet issued
+{
+  "id": "9e2f4b6a-1c3d-4e5f-8a7b-6c5d4e3f2a1b",
+  "status": "pending",
+  "policyNumber": "2026.055.401.04217",
+  "startDate": "2026-11-01",
+  "endDate": "2027-10-31",
+  "paymentId": "b4e8a2c6-7d1f-4a3b-9e5c-8f0a1b2c3d4e",
+  "certificateStatus": "pending",
+  "quote": { "...": "..." },
+  "vehicle": { "...": "..." },
+  "certificate": null,
+  "documents": { "certificateImageUrl": null, "contractDocumentUrl": null },
+  "created": "2026-10-20T09:19:47.118Z",
+  "updated": "2026-10-20T09:19:47.118Z"
+}
+```
+</ResponseExample>

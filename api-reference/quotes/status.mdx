@@ -1,0 +1,82 @@
+---
+title: "Get a quote's status"
+sidebarTitle: "Get quote status"
+description: "Follow a quote through payment to its contract."
+api: "GET /quote/{id}/status"
+authMethod: "key"
+---
+
+Poll this after [paying a quote](/api-reference/quotes/pay) to know when the payment settles. Djigui does not notify your systems yet.
+
+| `status` | Meaning |
+| --- | --- |
+| `awaiting_payment` | Never paid, or every attempt failed. You can pay it. |
+| `payment_pending` | Waiting for the payer to confirm in Wave. |
+| `pending`, `started`, `expired` | Paid: the contract's status. `contractId` is set. |
+
+<ParamField path="id" type="string" required>
+  The quote's id.
+</ParamField>
+
+## Response
+
+<ResponseField name="quoteId" type="string">
+</ResponseField>
+
+<ResponseField name="status" type="string">
+</ResponseField>
+
+<ResponseField name="contractId" type="string | null">
+  The contract, once paid. See [Get a contract](/api-reference/contracts/get).
+</ResponseField>
+<ResponseField name="payment" type="object | null">
+  The latest payment attempt, with the fields of [Pay a quote](/api-reference/quotes/pay#response). `null` if the quote was never paid.
+</ResponseField>
+
+## Errors
+
+| Status | `code` | |
+| --- | --- | --- |
+| 404 | `quote_not_found` | No quote with this id in your company. |
+
+<ResponseExample>
+```json Paid
+{
+  "quoteId": "6c1d8f0e-3b7a-4f5e-9a51-2d0c7e8b4a12",
+  "status": "pending",
+  "contractId": "9e2f4b6a-1c3d-4e5f-8a7b-6c5d4e3f2a1b",
+  "payment": {
+    "id": "b4e8a2c6-7d1f-4a3b-9e5c-8f0a1b2c3d4e",
+    "quoteId": "6c1d8f0e-3b7a-4f5e-9a51-2d0c7e8b4a12",
+    "status": "succeeded",
+    "amount": 98450,
+    "fees": 1477,
+    "chargedAmount": 99927,
+    "paymentUrl": null,
+    "failureReason": null,
+    "created": "2026-10-20T09:18:12.330Z",
+    "completed": "2026-10-20T09:19:47.118Z"
+  }
+}
+```
+
+```json Waiting
+{
+  "quoteId": "6c1d8f0e-3b7a-4f5e-9a51-2d0c7e8b4a12",
+  "status": "payment_pending",
+  "contractId": null,
+  "payment": {
+    "id": "b4e8a2c6-7d1f-4a3b-9e5c-8f0a1b2c3d4e",
+    "quoteId": "6c1d8f0e-3b7a-4f5e-9a51-2d0c7e8b4a12",
+    "status": "pending",
+    "amount": 98450,
+    "fees": 1477,
+    "chargedAmount": 99927,
+    "paymentUrl": "https://pay.wave.com/c/cos-1a2b3c4d5e6f",
+    "failureReason": null,
+    "created": "2026-10-20T09:18:12.330Z",
+    "completed": null
+  }
+}
+```
+</ResponseExample>

@@ -1,0 +1,70 @@
+---
+title: "Update a vehicle's external id"
+sidebarTitle: "Update external id"
+description: "Set, change or clear your own reference for a vehicle."
+api: "PATCH /vehicle/{id}"
+authMethod: "key"
+---
+
+Only `externalId` can change after registration.
+
+<ParamField path="id" type="string" required>
+  The vehicle's id.
+</ParamField>
+
+## Body
+
+<ParamField body="externalId" type="string | null" required>
+  The new external id, 1 to 255 characters, unique within your company. `null` clears it.
+</ParamField>
+
+## Response
+
+The updated vehicle, as in [Get a vehicle](/api-reference/vehicles/get).
+
+## Errors
+
+| Status | `code` | |
+| --- | --- | --- |
+| 400 | `invalid_request` | `externalId` is missing (send `null` to clear it), or not 1 to 255 characters. |
+| 404 | `vehicle_not_found` | No vehicle with this id in your company. |
+| 409 | `external_id_taken` | Another of your vehicles has this external id. `vehicleId` is that vehicle. |
+
+<RequestExample>
+```bash cURL
+curl -X PATCH https://businessapi-staging-civ.djigui.io/api/v1.0/vehicle/0f9b2abd-2fe8-4346-b49e-4a6aefd89a89 \
+  -H "x-api-key: $DJIGUI_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{ "externalId": "client-4821-car-2" }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200
+{
+  "id": "0f9b2abd-2fe8-4346-b49e-4a6aefd89a89",
+  "externalId": "client-4821-car-2",
+  "type": "auto",
+  "licencePlate": "1234AB01",
+  "brand": "Toyota",
+  "model": "Corolla",
+  "year": 2019,
+  "firstRoadDate": "2019-06-15",
+  "carOriginalValue": 15000000,
+  "carMarketValue": 9000000,
+  "energy": "essence",
+  "power": 7,
+  "noSeat": 5,
+  "hasRegistrationDocument": false,
+  "created": "2026-10-20T09:14:03.512Z"
+}
+```
+
+```json 409
+{
+  "code": "external_id_taken",
+  "message": "Another vehicle of the company already has this external id.",
+  "vehicleId": "5b7e1c2d-9a3f-4d6e-8b1a-0c2d3e4f5a6b"
+}
+```
+</ResponseExample>

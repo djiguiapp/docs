@@ -1,0 +1,113 @@
+---
+title: "Quickstart"
+description: "Insure a vehicle from start to finish: coverage, vehicle, quote, payment and contract."
+icon: "rocket"
+---
+
+This walkthrough insures a car for 12 months. Every request needs your company's API key in the `x-api-key` header (see [Authentication](/authentication)).
+
+```bash
+export DJIGUI_API=https://businessapi-staging-civ.djigui.io/api/v1.0
+export DJIGUI_API_KEY=djigui_ci_stg_...
+```
+
+<Steps>
+  <Step title="Pick a coverage">
+    ```bash
+    curl "$DJIGUI_API/coverage" -H "x-api-key: $DJIGUI_API_KEY"
+    ```
+
+    Each coverage comes with what it covers. Keep the `id` of the one your client wants.
+
+    ```json
+    [
+      {
+        "id": "20000000-0000-4000-8000-000000000001",
+        "name": "Tiers simple",
+        "description": "Responsabilité civile",
+        "vehicleType": "auto",
+        "order": 1,
+        "properties": [
+          { "label": "Responsabilité civile", "description": null },
+          { "label": "Défense et recours", "description": null }
+        ]
+      }
+    ]
+    ```
+  </Step>
+  <Step title="Register the vehicle">
+    ```bash
+    curl -X POST "$DJIGUI_API/vehicle" \
+      -H "x-api-key: $DJIGUI_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "type": "auto",
+        "licencePlate": "1234 AB 01",
+        "externalId": "client-4821-car-1",
+        "brand": "Toyota",
+        "model": "Corolla",
+        "year": 2019,
+        "firstRoadDate": "2019-06-15",
+        "carOriginalValue": 15000000,
+        "carMarketValue": 9000000,
+        "energy": "essence",
+        "power": 7,
+        "noSeat": 5
+      }'
+    ```
+
+    Keep the vehicle's `id`. If the vehicle is already registered, you get a `409 vehicle_already_exists` with its `vehicleId`: use that one. See [Vehicles](/guides/vehicles).
+  </Step>
+  <Step title="Get a quote">
+    ```bash
+    curl -X POST "$DJIGUI_API/quote/create" \
+      -H "x-api-key: $DJIGUI_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "vehicleId": "0f9b2abd-2fe8-4346-b49e-4a6aefd89a89",
+        "coverageId": "20000000-0000-4000-8000-000000000001",
+        "duration": 12,
+        "usage": "pleasure",
+        "policyHolderName": "Kouamé Yao Serge",
+        "policyHolderPhone": "07 57 46 84 58",
+        "startDate": "2026-11-01"
+      }'
+    ```
+
+    The response gives the premium in `amount` (francs CFA) and the quote's `id`. Its `status` is `awaiting_payment`.
+  </Step>
+  <Step title="Collect the payment">
+    Give the Wave number that will pay:
+
+    ```bash
+    curl -X POST "$DJIGUI_API/quote/6c1d8f0e-3b7a-4f5e-9a51-2d0c7e8b4a12/pay" \
+      -H "x-api-key: $DJIGUI_API_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{ "phoneNumber": "0757468458" }'
+    ```
+
+    Send the returned `paymentUrl` to the payer. They confirm in Wave, and only that number can pay. The amount asked is `chargedAmount`: the premium plus Wave's fee.
+
+    <Warning>
+      This is a real payment in production.
+    </Warning>
+  </Step>
+  <Step title="Wait for the contract">
+    Poll the quote's status until the payment settles:
+
+    ```bash
+    curl "$DJIGUI_API/quote/6c1d8f0e-3b7a-4f5e-9a51-2d0c7e8b4a12/status" \
+      -H "x-api-key: $DJIGUI_API_KEY"
+    ```
+
+    The status goes from `payment_pending` to `pending` once paid, and `contractId` is set. If the payment fails, it goes back to `awaiting_payment` and you can pay again. See [Payments](/guides/payments).
+  </Step>
+  <Step title="Get the certificate">
+    ```bash
+    curl "$DJIGUI_API/contract/9e2f4b6a-1c3d-4e5f-8a7b-6c5d4e3f2a1b" \
+      -H "x-api-key: $DJIGUI_API_KEY"
+    ```
+
+    Djigui requests the ASACI certificate as soon as the payment is confirmed. When `certificateStatus` is `issued`, `certificate` holds its number and links, and `documents` the download links for the certificate image and the contract. See [Contracts and certificates](/guides/contracts).
+  </Step>
+</Steps>

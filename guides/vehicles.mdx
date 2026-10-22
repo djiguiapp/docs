@@ -1,0 +1,73 @@
+---
+title: "Vehicles"
+description: "Register each vehicle once, find it again, and quote it as often as you need."
+icon: "car"
+---
+
+A vehicle is registered once and reused for every quote: a new contract period, a different coverage or a different usage does not need a new vehicle.
+
+## One vehicle per licence plate
+
+Your company can have only one vehicle per licence plate. Plates are normalised before they are stored or compared: spaces are removed and letters uppercased, so `1234 ab 01` and `1234AB01` are the same plate.
+
+Registering a plate your company already has answers `409` with the existing vehicle's id:
+
+```json
+{
+  "code": "vehicle_already_exists",
+  "message": "The company already has a vehicle with this licence plate or external id.",
+  "vehicleId": "0f9b2abd-2fe8-4346-b49e-4a6aefd89a89"
+}
+```
+
+You can treat this as a success and carry on with `vehicleId`. It also makes retrying a registration safe.
+
+## Your own reference: `externalId`
+
+Set `externalId` to the id the vehicle has in your systems, so you never need to store Djigui's ids. It is optional, up to 255 characters, and unique within your company, like the plate.
+
+Find a vehicle by either:
+
+```bash
+curl "$DJIGUI_API/vehicle?externalId=client-4821-car-1" -H "x-api-key: $DJIGUI_API_KEY"
+curl "$DJIGUI_API/vehicle?licencePlate=1234%20AB%2001" -H "x-api-key: $DJIGUI_API_KEY"
+```
+
+Both are exact matches, so `data` holds zero or one vehicle.
+
+You can set, change or clear (`null`) the external id of a registered vehicle with [`PATCH /vehicle/{id}`](/api-reference/vehicles/update).
+
+## Vehicles cannot be edited
+
+Apart from `externalId`, a vehicle cannot change after registration: its details are what quotes are priced on. Check them before you send them. If a registered vehicle is wrong, contact Djigui.
+
+## Usage belongs to the quote
+
+How the vehicle is used (`pleasure` or `renting`) is not part of the vehicle. You give it on each [quote](/api-reference/quotes/create), so the same vehicle can be quoted for pleasure, then for renting.
+
+## Registration document
+
+You can attach the vehicle's registration document (carte grise) when you register it. Send the request as `multipart/form-data` instead of JSON, with the same fields as form fields and the file in `registrationDocument`:
+
+```bash
+curl -X POST "$DJIGUI_API/vehicle" \
+  -H "x-api-key: $DJIGUI_API_KEY" \
+  -F type=auto \
+  -F licencePlate="1234 AB 01" \
+  -F brand=Toyota \
+  -F model=Corolla \
+  -F year=2019 \
+  -F firstRoadDate=2019-06-15 \
+  -F carOriginalValue=15000000 \
+  -F carMarketValue=9000000 \
+  -F energy=essence \
+  -F power=7 \
+  -F noSeat=5 \
+  -F registrationDocument=@carte-grise.pdf
+```
+
+The file must be a PDF, JPEG or PNG of 10 MB or less. The vehicle's `hasRegistrationDocument` tells you whether one was attached. A document can only be attached at registration.
+
+## Cars and motorbikes
+
+`type` is `auto` for a car or `bike` for a motorbike. A vehicle can only be quoted under a coverage for its type. For a motorbike, `power` is the cubic capacity instead of the fiscal horsepower.

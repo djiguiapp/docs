@@ -1,0 +1,110 @@
+---
+title: "Pay a quote"
+description: "Open a Wave payment for a quote."
+api: "POST /quote/{id}/pay"
+authMethod: "key"
+---
+
+<Warning>
+  In production, this opens a **real** Wave payment.
+</Warning>
+
+Opens a Wave payment for the quote's premium plus Wave's fee. Send the returned `paymentUrl` to the payer: they confirm in Wave, and only `phoneNumber` can pay. They have 30 minutes.
+
+Then follow the quote with [`GET /quote/{id}/status`](/api-reference/quotes/status). See the [Payments guide](/guides/payments).
+
+The quote must start today or later. Calling this again while a payment waits does not open a second one: it answers `409 payment_in_progress` with the waiting payment's `paymentUrl`.
+
+<ParamField path="id" type="string" required>
+  The quote's id.
+</ParamField>
+
+## Body
+
+<ParamField body="phoneNumber" type="string" required>
+  The Wave number that will pay: an Ivorian mobile, 10 digits starting with `01`, `05` or `07`, with or without `+225`, spaces allowed. It can differ from the policyholder's.
+</ParamField>
+
+## Response
+
+`201 Created`, with the payment.
+
+<ResponseField name="id" type="string">
+</ResponseField>
+
+<ResponseField name="quoteId" type="string">
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  `pending` until the payer confirms, then `succeeded` or `failed`.
+</ResponseField>
+<ResponseField name="amount" type="integer">
+  The quote's premium, francs CFA.
+</ResponseField>
+<ResponseField name="fees" type="integer">
+  Wave's fee, added on top.
+</ResponseField>
+<ResponseField name="chargedAmount" type="integer">
+  What the payer is asked for: `amount + fees`.
+</ResponseField>
+<ResponseField name="paymentUrl" type="string | null">
+  Where the payer confirms with Wave. Set only while the payment is `pending`.
+</ResponseField>
+
+<ResponseField name="failureReason" type="string | null">
+</ResponseField>
+
+<ResponseField name="created" type="string">
+  ISO 8601 timestamp.
+</ResponseField>
+<ResponseField name="completed" type="string | null">
+  When it succeeded or failed.
+</ResponseField>
+
+## Errors
+
+| Status | `code` | |
+| --- | --- | --- |
+| 400 | `invalid_request` | `phoneNumber` is not an Ivorian mobile number. |
+| 404 | `quote_not_found` | No quote with this id in your company. |
+| 409 | `payment_in_progress` | A payment is already waiting. `paymentId` and `paymentUrl` are that payment's. |
+| 409 | `quote_already_paid` | The quote already has a contract. |
+| 422 | `quote_start_date_passed` | The quote's start date has passed: create a new quote. |
+| 422 | `quote_incomplete` | The quote has no policyholder phone: create a new quote. |
+| 502 | `payment_provider_unavailable` | Wave could not open the payment. Recorded as failed: retry later. |
+| 503 | `payment_unavailable` | Payments are unavailable for now. Retry later. |
+
+<RequestExample>
+```bash cURL
+curl -X POST https://businessapi-staging-civ.djigui.io/api/v1.0/quote/6c1d8f0e-3b7a-4f5e-9a51-2d0c7e8b4a12/pay \
+  -H "x-api-key: $DJIGUI_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{ "phoneNumber": "07 57 46 84 58" }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json 201
+{
+  "id": "b4e8a2c6-7d1f-4a3b-9e5c-8f0a1b2c3d4e",
+  "quoteId": "6c1d8f0e-3b7a-4f5e-9a51-2d0c7e8b4a12",
+  "status": "pending",
+  "amount": 98450,
+  "fees": 1477,
+  "chargedAmount": 99927,
+  "paymentUrl": "https://pay.wave.com/c/cos-1a2b3c4d5e6f",
+  "failureReason": null,
+  "created": "2026-10-20T09:18:12.330Z",
+  "completed": null
+}
+```
+
+```json 409
+{
+  "code": "payment_in_progress",
+  "message": "A payment for this quote is already waiting for the payer.",
+  "paymentId": "b4e8a2c6-7d1f-4a3b-9e5c-8f0a1b2c3d4e",
+  "paymentUrl": "https://pay.wave.com/c/cos-1a2b3c4d5e6f"
+}
+```
+</ResponseExample>

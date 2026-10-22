@@ -1,0 +1,40 @@
+---
+title: "Authentication"
+description: "Authenticate every request with your company's API key."
+icon: "key"
+---
+
+Every request carries your company's API key in the `x-api-key` header:
+
+```bash
+curl https://businessapi-staging-civ.djigui.io/api/v1.0/coverage \
+  -H "x-api-key: djigui_ci_stg_..."
+```
+
+A missing, wrong or revoked key answers `401`:
+
+```json
+{ "code": "unauthenticated", "message": "Missing or invalid credentials." }
+```
+
+## Getting a key
+
+Djigui creates your company's account and gives you its key. Your company can make requests once Djigui has verified it.
+
+Keys look like `djigui_ci_stg_` (staging) or `djigui_ci_prod_` (production) followed by 43 letters and digits. Each key works only in its own environment. Djigui shows a key only once, when it is created, and stores only a hash of it: it cannot be recovered, only replaced.
+
+## One key per company
+
+The key belongs to your company, not to a person. Everything created with it (vehicles, quotes, contracts) belongs to your company and stays visible when people join or leave.
+
+Your company has a single key at a time. When Djigui issues a new one, the previous key stops working **at once**: deploy the new key before asking for a rotation if you cannot afford downtime.
+
+## Keeping it safe
+
+<Warning>
+  Your key can open real payments in your company's name. Keep it on your servers only.
+</Warning>
+
+- Never put the key in a mobile app, a web page or anything your clients can download.
+- Store it in a secret manager or an environment variable, not in your source code.
+- If it leaks, ask Djigui for a new key right away: the old one stops working as soon as the new one is issued.

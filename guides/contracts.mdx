@@ -1,0 +1,64 @@
+---
+title: "Contracts and certificates"
+description: "What happens after payment: the contract, its ASACI certificate and its documents."
+icon: "file-certificate"
+---
+
+A contract is opened as soon as a quote's payment is confirmed. Its id is the quote's `contractId`.
+
+## Contract status
+
+| `status` | Meaning |
+| --- | --- |
+| `pending` | Paid. Waiting for the ASACI certificate, or for the start date. |
+| `started` | The certificate is issued and the start date has come: the vehicle is covered. |
+| `expired` | The end date has passed. |
+
+`startDate` and `endDate` are the first and last days covered. A 12-month contract starting on `2026-11-01` ends on `2027-10-31`.
+
+A contract becomes `started` or `expired` within about ten minutes of the day changing.
+
+## The ASACI certificate
+
+Djigui requests the vehicle's ASACI certificate (attestation d'assurance) as soon as the payment is confirmed. Follow it with `certificateStatus`:
+
+| `certificateStatus` | Meaning |
+| --- | --- |
+| `pending` | Being requested from ASACI. |
+| `issued` | Issued: `certificate` holds it. |
+| `failed` | ASACI refused it for good. Djigui has to step in: contact Djigui with the contract id. |
+
+Djigui sends the request to ASACI within a minute of the payment, and the certificate usually follows shortly after. When ASACI refuses a request, Djigui retries, waiting longer between each attempt, for a few hours before giving up.
+
+Once issued, `certificate` gives:
+
+| Field | |
+| --- | --- |
+| `certificateNumber` | The certificate's number. |
+| `insuranceCompany` | The insurer. |
+| `effectiveDate`, `expiryDate` | The dates printed on the certificate. |
+| `pdfLink`, `imageLink` | The certificate, as hosted by ASACI. |
+| `qrCodeLink` | Its QR code, for checks. |
+
+## Documents
+
+Once the certificate is issued, Djigui also stores a copy of the certificate image and generates the insurance contract. `documents` gives download links for both:
+
+```json
+"documents": {
+  "certificateImageUrl": "https://...",
+  "contractDocumentUrl": "https://..."
+}
+```
+
+<Note>
+  These links are valid for **one hour**. Download the files, or fetch the contract again for fresh links, rather than storing the links.
+</Note>
+
+A link is `null` until its file is stored. The certificate is valid even if a document is missing.
+
+## Finding contracts
+
+- One contract: [`GET /contract/{id}`](/api-reference/contracts/get), with the quote's `contractId`.
+- A vehicle's contracts: [`GET /contract?vehicleId=...`](/api-reference/contracts/list).
+- All your company's contracts: [`GET /contract`](/api-reference/contracts/list), most recent first.

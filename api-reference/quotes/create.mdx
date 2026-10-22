@@ -1,0 +1,178 @@
+---
+title: "Create a quote"
+description: "Price a vehicle under a coverage, for a usage, duration and start date."
+api: "POST /quote/create"
+authMethod: "key"
+---
+
+Prices one of your vehicles, as registered, under a coverage. The quote can then be [paid](/api-reference/quotes/pay) until its start date.
+
+You can create as many quotes as you need for the same vehicle: other coverages, durations or usages.
+
+## Body
+
+<ParamField body="vehicleId" type="string" required>
+  One of your company's vehicles.
+</ParamField>
+
+<ParamField body="coverageId" type="string" required>
+  A coverage for the vehicle's type: a car coverage for an `auto`, a motorbike coverage for a `bike`.
+</ParamField>
+
+<ParamField body="duration" type="integer" required>
+  `3`, `6` or `12` months.
+</ParamField>
+
+<ParamField body="usage" type="string" required>
+  How the vehicle is used under this contract: `pleasure` (private and business use) or `renting` (rental).
+</ParamField>
+
+<ParamField body="policyHolderName" type="string" required>
+  The policyholder's full name, 2 to 150 characters.
+</ParamField>
+
+<ParamField body="policyHolderPhone" type="string" required>
+  The policyholder's Ivorian mobile number: 10 digits starting with `01`, `05` or `07`, with or without `+225`, spaces allowed. Printed on the ASACI certificate. Returned as `+225` followed by the 10 digits.
+</ParamField>
+
+<ParamField body="startDate" type="string" required>
+  First day covered, `YYYY-MM-DD`, today or later.
+</ParamField>
+
+## Response
+
+`201 Created`, with the quote. Its `status` is `awaiting_payment`.
+
+<ResponseField name="id" type="string">
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  `awaiting_payment`, `payment_pending`, then the contract's status: `pending`, `started` or `expired`. See [Payments](/guides/payments#knowing-when-it-is-paid).
+</ResponseField>
+<ResponseField name="contractId" type="string | null">
+  The contract, once the quote is paid.
+</ResponseField>
+<ResponseField name="amount" type="integer">
+  The premium for the whole duration, in francs CFA. Wave's fee is added when paying.
+</ResponseField>
+<ResponseField name="duration" type="integer">
+  Months.
+</ResponseField>
+
+<ResponseField name="usage" type="string">
+</ResponseField>
+
+<ResponseField name="startDate" type="string">
+</ResponseField>
+
+<ResponseField name="policyHolderName" type="string">
+</ResponseField>
+
+<ResponseField name="policyHolderPhone" type="string | null">
+  `+225` followed by 10 digits.
+</ResponseField>
+
+<ResponseField name="coverageId" type="string">
+</ResponseField>
+
+<ResponseField name="coverage" type="object | null">
+  What the quote covers.
+
+  <Expandable title="coverage">
+    <ResponseField name="id" type="string">
+    </ResponseField>
+    <ResponseField name="name" type="string">
+    </ResponseField>
+    <ResponseField name="description" type="string | null">
+    </ResponseField>
+    <ResponseField name="order" type="integer | null">
+    </ResponseField>
+    <ResponseField name="properties" type="object[]">
+      `label` and `description` of each thing covered.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+<ResponseField name="vehicle" type="object">
+  The vehicle, as in [Get a vehicle](/api-reference/vehicles/get).
+</ResponseField>
+<ResponseField name="created" type="string">
+  ISO 8601 timestamp.
+</ResponseField>
+
+## Errors
+
+| Status | `code` | |
+| --- | --- | --- |
+| 400 | `invalid_request` | A field breaks a rule, or `startDate` is before today. |
+| 404 | `vehicle_not_found` | No vehicle with this id in your company. |
+| 404 | `coverage_not_found` | No vehicle coverage with this id. |
+| 422 | `coverage_not_available` | The coverage is for the other vehicle type, the vehicle is too old for it, or it cannot be priced through this API. `message` says which. |
+
+<RequestExample>
+```bash cURL
+curl -X POST https://businessapi-staging-civ.djigui.io/api/v1.0/quote/create \
+  -H "x-api-key: $DJIGUI_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "vehicleId": "0f9b2abd-2fe8-4346-b49e-4a6aefd89a89",
+    "coverageId": "20000000-0000-4000-8000-000000000001",
+    "duration": 12,
+    "usage": "pleasure",
+    "policyHolderName": "Kouamé Yao Serge",
+    "policyHolderPhone": "07 57 46 84 58",
+    "startDate": "2026-11-01"
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json 201
+{
+  "id": "6c1d8f0e-3b7a-4f5e-9a51-2d0c7e8b4a12",
+  "status": "awaiting_payment",
+  "contractId": null,
+  "amount": 98450,
+  "duration": 12,
+  "usage": "pleasure",
+  "startDate": "2026-11-01",
+  "policyHolderName": "Kouamé Yao Serge",
+  "policyHolderPhone": "+2250757468458",
+  "coverageId": "20000000-0000-4000-8000-000000000001",
+  "coverage": {
+    "id": "20000000-0000-4000-8000-000000000001",
+    "name": "Tiers simple",
+    "description": "Responsabilité civile",
+    "order": 1,
+    "properties": [
+      { "label": "Responsabilité civile", "description": null },
+      { "label": "Défense et recours", "description": null }
+    ]
+  },
+  "vehicle": {
+    "id": "0f9b2abd-2fe8-4346-b49e-4a6aefd89a89",
+    "externalId": "client-4821-car-1",
+    "type": "auto",
+    "licencePlate": "1234AB01",
+    "brand": "Toyota",
+    "model": "Corolla",
+    "year": 2019,
+    "firstRoadDate": "2019-06-15",
+    "carOriginalValue": 15000000,
+    "carMarketValue": 9000000,
+    "energy": "essence",
+    "power": 7,
+    "noSeat": 5,
+    "hasRegistrationDocument": false,
+    "created": "2026-10-20T09:14:03.512Z"
+  },
+  "created": "2026-10-20T09:16:41.007Z"
+}
+```
+
+```json 422
+{
+  "code": "coverage_not_available",
+  "message": "The vehicle is too old for this coverage."
+}
+```
+</ResponseExample>

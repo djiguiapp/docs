@@ -1,0 +1,68 @@
+---
+title: "Introduction"
+description: "Insure your clients' vehicles through Djigui, from your own systems."
+icon: "house"
+---
+
+The Djigui Business API lets your company take out vehicle insurance on behalf of your clients. You register a client's vehicle, get a price for the coverage they want, have them pay with Wave, and follow the resulting contract until its ASACI certificate is issued.
+
+## How it works
+
+<Steps>
+  <Step title="Choose a coverage">
+    List the coverages Djigui sells and what each one covers. Prices are not listed: they depend on the vehicle.
+  </Step>
+  <Step title="Register the vehicle">
+    Send the vehicle's details once, with its registration document if you have it. You can quote the same vehicle as many times as you need.
+  </Step>
+  <Step title="Get a quote">
+    Price the vehicle under a coverage, for 3, 6 or 12 months, for a given usage and start date.
+  </Step>
+  <Step title="Collect the payment">
+    Open a Wave payment for the quote. The payer confirms it from their Wave app.
+  </Step>
+  <Step title="Follow the contract">
+    Once paid, the quote becomes a contract. Djigui requests the ASACI certificate and gives you its links and documents as soon as it is issued.
+  </Step>
+</Steps>
+
+## Base URL
+
+Every endpoint is under:
+
+```text
+https://businessapi-staging-civ.djigui.io/api/v1.0
+```
+
+<Note>
+  This is the staging environment: build and test your integration against it. Djigui gives you the production URL and key when you go live, where payments are real Wave payments.
+</Note>
+
+## Conventions
+
+- Requests and responses are JSON, except for [vehicle registration](/api-reference/vehicles/create) with a document, which also accepts `multipart/form-data`.
+- Amounts are integers in francs CFA (XOF).
+- Dates are `YYYY-MM-DD`. Timestamps (`created`, `updated`, `completed`) are ISO 8601 in UTC.
+- Ids are UUIDs.
+- Unknown fields in a request body are refused with a `400`. Send only the documented fields.
+- Everything you create belongs to your company: you never see another company's data, and their ids answer `404`.
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Quickstart" icon="rocket" href="/quickstart">
+    Insure a vehicle from start to finish.
+  </Card>
+
+  <Card title="Authentication" icon="key" href="/authentication">
+    Get and use your API key.
+  </Card>
+
+  <Card title="Errors" icon="triangle-exclamation" href="/errors">
+    Every error code and what to do about it.
+  </Card>
+
+  <Card title="API reference" icon="code" href="/api-reference/coverages/list">
+    Every endpoint, field and response.
+  </Card>
+</CardGroup>

@@ -1,0 +1,88 @@
+---
+title: "Get a vehicle"
+description: "One of your company's vehicles."
+api: "GET /vehicle/{id}"
+authMethod: "key"
+---
+
+<ParamField path="id" type="string" required>
+  The vehicle's id.
+</ParamField>
+
+## Response
+
+<ResponseField name="id" type="string">
+</ResponseField>
+
+<ResponseField name="externalId" type="string | null">
+  Your own reference for the vehicle.
+</ResponseField>
+<ResponseField name="type" type="string">
+  `auto` or `bike`.
+</ResponseField>
+<ResponseField name="licencePlate" type="string">
+  No spaces, uppercased.
+</ResponseField>
+
+<ResponseField name="brand" type="string">
+</ResponseField>
+
+<ResponseField name="model" type="string">
+</ResponseField>
+
+<ResponseField name="year" type="integer">
+</ResponseField>
+
+<ResponseField name="firstRoadDate" type="string">
+  `YYYY-MM-DD`.
+</ResponseField>
+<ResponseField name="carOriginalValue" type="integer">
+  Value when new, francs CFA.
+</ResponseField>
+<ResponseField name="carMarketValue" type="integer">
+  Value today, francs CFA.
+</ResponseField>
+<ResponseField name="energy" type="string">
+  `essence`, `diesel`, `electric` or `hybrid`.
+</ResponseField>
+<ResponseField name="power" type="integer">
+  Fiscal horsepower for a car, cubic capacity for a motorbike.
+</ResponseField>
+
+<ResponseField name="noSeat" type="integer">
+</ResponseField>
+
+<ResponseField name="hasRegistrationDocument" type="boolean">
+</ResponseField>
+
+<ResponseField name="created" type="string">
+  ISO 8601 timestamp.
+</ResponseField>
+
+## Errors
+
+| Status | `code` | |
+| --- | --- | --- |
+| 404 | `vehicle_not_found` | No vehicle with this id in your company. |
+
+<ResponseExample>
+```json 200
+{
+  "id": "0f9b2abd-2fe8-4346-b49e-4a6aefd89a89",
+  "externalId": "client-4821-car-1",
+  "type": "auto",
+  "licencePlate": "1234AB01",
+  "brand": "Toyota",
+  "model": "Corolla",
+  "year": 2019,
+  "firstRoadDate": "2019-06-15",
+  "carOriginalValue": 15000000,
+  "carMarketValue": 9000000,
+  "energy": "essence",
+  "power": 7,
+  "noSeat": 5,
+  "hasRegistrationDocument": false,
+  "created": "2026-10-20T09:14:03.512Z"
+}
+```
+</ResponseExample>

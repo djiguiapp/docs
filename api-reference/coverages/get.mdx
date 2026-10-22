@@ -1,0 +1,68 @@
+---
+title: "Get a coverage"
+description: "One coverage, car or motorbike."
+api: "GET /coverage/{id}"
+authMethod: "key"
+---
+
+Returns one coverage, with the same fields as in [the list](/api-reference/coverages/list). Unlike the list, it also finds motorbike coverages.
+
+<ParamField path="id" type="string" required>
+  The coverage's id.
+</ParamField>
+
+## Response
+
+<ResponseField name="id" type="string">
+</ResponseField>
+
+<ResponseField name="name" type="string">
+</ResponseField>
+
+<ResponseField name="description" type="string | null">
+</ResponseField>
+
+<ResponseField name="vehicleType" type="string">
+  `auto` or `bike`.
+</ResponseField>
+
+<ResponseField name="order" type="integer | null">
+</ResponseField>
+
+<ResponseField name="properties" type="object[]">
+  <Expandable title="properties">
+    <ResponseField name="label" type="string">
+    </ResponseField>
+    <ResponseField name="description" type="string | null">
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Errors
+
+| Status | `code` | |
+| --- | --- | --- |
+| 404 | `coverage_not_found` | No vehicle coverage with this id. |
+
+<ResponseExample>
+```json 200
+{
+  "id": "20000000-0000-4000-8000-000000000001",
+  "name": "Tiers simple",
+  "description": "Responsabilité civile",
+  "vehicleType": "auto",
+  "order": 1,
+  "properties": [
+    { "label": "Responsabilité civile", "description": null },
+    { "label": "Défense et recours", "description": null }
+  ]
+}
+```
+
+```json 404
+{
+  "code": "coverage_not_found",
+  "message": "This coverage does not exist."
+}
+```
+</ResponseExample>

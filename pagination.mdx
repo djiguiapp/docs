@@ -1,0 +1,34 @@
+---
+title: "Pagination"
+description: "How list endpoints page their results."
+icon: "list"
+---
+
+List endpoints ([vehicles](/api-reference/vehicles/list), [quotes](/api-reference/quotes/list), [contracts](/api-reference/contracts/list)) return results most recent first, one page at a time.
+
+| Query parameter | Default | Rule |
+| --- | --- | --- |
+| `page` | `1` | Integer, 1 or more. |
+| `limit` | `20` | Integer, 1 to 100. |
+
+```bash
+curl "https://businessapi-staging-civ.djigui.io/api/v1.0/quote?page=2&limit=50" \
+  -H "x-api-key: $DJIGUI_API_KEY"
+```
+
+The response wraps the results:
+
+```json
+{
+  "data": [ ... ],
+  "page": 2,
+  "limit": 50,
+  "total": 137
+}
+```
+
+`total` counts every result across all pages. There are more pages while `page × limit < total`.
+
+<Note>
+  [`GET /coverage`](/api-reference/coverages/list) is not paginated: it returns every coverage at once.
+</Note>
